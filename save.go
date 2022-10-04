@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -113,7 +114,14 @@ func saveMain(_ *cobra.Command, args []string) error {
 		}
 	}
 	if len(libsWithBadLicenses) > 0 {
-		return fmt.Errorf("one or more libraries have an incompatible/unknown license: %q", libsWithBadLicenses)
+		if len(libsWithBadLicenses[licenses.Unknown]) > 0 {
+			log.Printf("one or more libraries have an unknown license: %q", libsWithBadLicenses[licenses.Unknown])
+		}
+
+		delete(libsWithBadLicenses, licenses.Unknown)
+		if len(libsWithBadLicenses) > 0 {
+			return fmt.Errorf("one or more libraries have an unsupported license: %q", libsWithBadLicenses)
+		}
 	}
 	return nil
 }
